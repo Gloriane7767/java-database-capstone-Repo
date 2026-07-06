@@ -1,9 +1,6 @@
-1. User accesses AdminDashboard or DoctorDashboard pages, or interacts with the Appointments, PatientDashboard, or PatientRecord modules via the JSON API.
-2. The action is routed to the appropriate Thymeleaf Controller (for dashboard pages) or REST Controller (for API calls) within the SpringBootApp.
- 3. The controller calls the Service Layer, which handles the core business logic.
-4. The Service Layer uses the MySQL Repositories or the MongoDB Repository depending on the type of data needed.
-5. The MySQL Repositories access the MySQL Database to retrieve or store relational data.
-6.  The MongoDB Repository accesses the MongoDB Database, returning data as a MongoDB Model (e.g., Prescription).
-7. The MySQL Database data is mapped through JPA Entities (Patient, Doctor, Appointment, Admin) into MySQL Models used by the application.
-
-   
+## The architecture has five layers:
+1. Client tier — the Thymeleaf-based dashboards (Admin, Doctor) and the REST-facing modules (Appointments, PatientDashboard, PatientRecord).
+2. Controller tier, inside the Spring Boot app — Thymeleaf controllers serve the dashboard pages, REST controllers handle JSON API calls.
+3. Service layer — a single shared layer holding the business logic, called by both controller types.
+4. Repository tier — MySQL repositories (JPA-based) and a MongoDB repository (driver-based), used by the service layer depending on the data type.
+5. Database tier — the MySQL database (relational data: Patient, Doctor, Appointment, Admin) and the MongoDB database (document data: Prescription).
