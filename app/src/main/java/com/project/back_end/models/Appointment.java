@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,8 +21,6 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Loaded lazily since an appointment is usually fetched without needing
-    // the full doctor object immediately.
     @NotNull(message = "Doctor is required")
     @ManyToOne(fetch = FetchType.LAZY)
     private Doctor doctor;
@@ -37,34 +33,21 @@ public class Appointment {
     @Future(message = "Appointment time must be in the future")
     private LocalDateTime appointmentTime;
 
-    @NotNull(message = "Status is required")
-    @Enumerated(EnumType.STRING)
-    private Status status;
-
-    public enum Status {
-        SCHEDULED,
-        COMPLETED,
-        CANCELLED
-    }
+    // 0 = Scheduled, 1 = Completed, 2 = Cancelled
+    private int status;
 
     public Appointment() {
     }
 
-    public Appointment(Doctor doctor, Patient patient, LocalDateTime appointmentTime, Status status) {
+    public Appointment(Doctor doctor, Patient patient, LocalDateTime appointmentTime, int status) {
         this.doctor = doctor;
         this.patient = patient;
         this.appointmentTime = appointmentTime;
         this.status = status;
     }
 
-    // Standard appointment slot length. Extracted as a constant so it's easy
-    // to change in one place if slot duration policy ever changes.
     private static final long DEFAULT_DURATION_MINUTES = 60;
 
-    /**
-     * Returns the calculated end time of the appointment, assuming a fixed
-     * 60-minute slot. Not persisted — derived on demand from appointmentTime.
-     */
     @Transient
     @JsonIgnore
     public LocalDateTime getEndTime() {
@@ -74,20 +57,12 @@ public class Appointment {
         return appointmentTime.plusMinutes(DEFAULT_DURATION_MINUTES);
     }
 
-    /**
-     * Convenience helper returning just the date portion of the appointment,
-     * useful for grouping/filtering appointments by day.
-     */
     @Transient
     @JsonIgnore
     public java.time.LocalDate getAppointmentDate() {
         return appointmentTime == null ? null : appointmentTime.toLocalDate();
     }
 
-    /**
-     * Convenience helper returning just the time-of-day portion of the
-     * appointment.
-     */
     @Transient
     @JsonIgnore
     public java.time.LocalTime getAppointmentTimeOnly() {
@@ -126,11 +101,11 @@ public class Appointment {
         this.appointmentTime = appointmentTime;
     }
 
-    public Status getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 }
