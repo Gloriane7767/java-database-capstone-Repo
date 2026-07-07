@@ -1,7 +1,8 @@
+
 // prescriptionServices.js
 import { API_BASE_URL } from '../config/config.js'
-
 const PRESCRITION_API = API_BASE_URL + "/prescription"
+
 export async function savePrescription(prescription, token) {
   try {
     const response = await fetch(`${PRESCRITION_API}/${token}`, {
@@ -16,7 +17,7 @@ export async function savePrescription(prescription, token) {
   }
   catch (error) {
     console.error("Error :: savePrescription :: ", error)
-    return { success: false, message: result.message }
+    return { success: false, message: "Network error. Please try again later." }
   }
 }
 
@@ -28,17 +29,13 @@ export async function getPrescription(appointmentId, token) {
         "Content-Type": "application/json"
       }
     });
-
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Failed to fetch prescription:", errorData);
       throw new Error(errorData.message || "Unable to fetch prescription");
     }
-
     const result = await response.json();
-    console.log(result)
-    console.log(result)
-    return result; // This should be your prescription object
+    return result;
   } catch (error) {
     console.error("Error :: getPrescription ::", error);
     throw error;
