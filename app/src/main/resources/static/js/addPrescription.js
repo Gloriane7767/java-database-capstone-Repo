@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const notesInput = document.getElementById("notes");
   const heading = document.getElementById("heading")
 
-
   const urlParams = new URLSearchParams(window.location.search);
   const appointmentId = urlParams.get("appointmentId");
   const mode = urlParams.get("mode");
@@ -23,7 +22,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-
   // Pre-fill patient name
   if (patientNameInput && patientName) {
     patientNameInput.value = patientName;
@@ -35,41 +33,45 @@ document.addEventListener('DOMContentLoaded', async () => {
       const response = await getPrescription(appointmentId, token);
       console.log("getPrescription :: ", response);
 
-      // Now, check if the prescription exists in the response and access it from the array
-      if (response.prescription && response.prescription.length > 0) {
-        const existingPrescription = response.prescription[0]; // Access first prescription object
-        patientNameInput.value = existingPrescription.patientName || YOU;
-        medicinesInput.value = existingPrescription.medication || "";
+      if (response.prescriptions && response.prescriptions.length > 0) {
+        const existingPrescription = response.prescriptions[0];
+        patientNameInput.value = existingPrescription.patientName || "You";
+        medicinesInput.value = Array.isArray(existingPrescription.medication)
+          ? existingPrescription.medication.join(", ")
+          : (existingPrescription.medication || "");
         dosageInput.value = existingPrescription.dosage || "";
         notesInput.value = existingPrescription.doctorNotes || "";
       }
-
     } catch (error) {
       console.warn("No existing prescription found or failed to load:", error);
     }
   }
+
   if (mode === 'view') {
-    // Make fields read-only
     patientNameInput.disabled = true;
     medicinesInput.disabled = true;
     dosageInput.disabled = true;
     notesInput.disabled = true;
-    savePrescriptionBtn.style.display = "none";  // Hide the save button
+    savePrescriptionBtn.style.display = "none";
   }
-  // Save prescription on button click
+
   savePrescriptionBtn.addEventListener('click', async (e) => {
     e.preventDefault();
 
+    const medicationList = medicinesInput.value
+      .split(",")
+      .map((m) => m.trim())
+      .filter((m) => m.length > 0);
+
     const prescription = {
       patientName: patientNameInput.value,
-      medication: medicinesInput.value,
+      medication: medicationList,
       dosage: dosageInput.value,
       doctorNotes: notesInput.value,
       appointmentId
     };
 
     const { success, message } = await savePrescription(prescription, token);
-
     if (success) {
       alert("✅ Prescription saved successfully.");
       selectRole('doctor');
