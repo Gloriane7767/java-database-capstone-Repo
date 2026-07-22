@@ -20,7 +20,7 @@ export async function deleteDoctor(id, token) {
       method: "DELETE",
     });
     const data = await response.json();
-    return { success: response.ok, message: data.message };
+    return { success: response.ok, message: data.message || data.error };
   } catch (error) {
     console.error("Error :: deleteDoctor :: ", error);
     return { success: false, message: "Failed to delete doctor" };
@@ -37,7 +37,7 @@ export async function saveDoctor(doctor, token) {
       body: JSON.stringify(doctor),
     });
     const data = await response.json();
-    return { success: response.ok, message: data.message };
+    return { success: response.ok, message: data.message || data.error };
   } catch (error) {
     console.error("Error :: saveDoctor :: ", error);
     return { success: false, message: "Failed to save doctor" };
