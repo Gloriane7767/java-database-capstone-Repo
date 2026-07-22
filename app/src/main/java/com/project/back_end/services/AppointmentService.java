@@ -128,7 +128,10 @@ public class AppointmentService {
         LocalDateTime endOfDay = date.atTime(23, 59, 59);
 
         List<Appointment> appointments;
-        if (patientName == null || patientName.trim().isEmpty()) {
+        // The frontend sometimes sends the literal string "null" (from JS
+        // template literals converting a null value to text) instead of an
+        // actual empty value, so that case must be treated as "no filter" too.
+        if (patientName == null || patientName.trim().isEmpty() || patientName.equalsIgnoreCase("null")) {
             appointments = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctorId, startOfDay, endOfDay);
         } else {
             appointments = appointmentRepository
