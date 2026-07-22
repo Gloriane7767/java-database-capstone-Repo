@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,7 +44,10 @@ public class Doctor {
 
     // Simple list of available time slots, e.g. "09:00-10:00", "14:00-15:00".
     // A separate table (doctor_available_times) is generated to back this collection.
-    @ElementCollection
+    // Loaded EAGERly (not lazily) because this collection is small and needs to
+    // be available for JSON serialization even outside an open Hibernate session
+    // (open-in-view is disabled), e.g. when returning doctors from a REST endpoint.
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> availableTimes;
 
     public Doctor() {
@@ -115,4 +119,3 @@ public class Doctor {
         this.availableTimes = availableTimes;
     }
 }
-
